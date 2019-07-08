@@ -1,0 +1,27 @@
+security:
+
+    encoders:
+        AppBundle\Entity\User:
+            algorithm: bcrypt
+            cost: 4
+
+    providers:
+        our_db_provider:
+            entity:
+                class: AppBundle:User
+                property: email
+ 
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+ 
+        main:
+            anonymous: ~
+            provider: our_db_provider
+            form_login:
+                login_path: /login
+                check_path: /login_check
+            logout:
+                path: logout
+                target: /
