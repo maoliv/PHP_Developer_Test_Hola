@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use FOS\UserBundle\Model\User as BaseUser;
 
 /**
  * @ORM\Entity
@@ -53,7 +54,6 @@ class User implements UserInterface
 
     public function __construct()
     {
-        $this->roles = ['ROLE_USER'];
     }
 
     // other properties and methods
@@ -117,6 +117,17 @@ class User implements UserInterface
 
     public function setRoles($roles)
     {
+        $allowed_roles = array('ADMIN', 'PAGE_1', 'PAGE_2');
+        if (!empty($roles))
+        {
+            foreach ($roles as $role)
+            {
+                if (!in_array($role, $allowed_roles))
+                {
+                    throw new \Exception('USER ROLES ARE INVALID');
+                }
+            }
+        }
         $this->roles = $roles;
     }
 

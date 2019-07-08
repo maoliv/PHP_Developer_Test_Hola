@@ -2,218 +2,150 @@
 
 namespace AppBundle\Controller;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Routing\Annotation\Route;
+use FOS\RestBundle\Controller\Annotations as Rest;
+use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use FOS\RestBundle\View\View;
 use AppBundle\Entity\User;
 
-class UserController extends Controller {
-
+class UserController extends FOSRestController {
     /**
-     * @Route("/create-user")
+     * @Rest\Post("/user")
      */
-    public function createAction(Request $request, UserPasswordEncoderInterface $passwordEncoder)
+    public function postAction(Request $request)
     {
-        /*$user = new User();
+        $data = new User;
 
-        $form = $this->createFormBuilder($user)
-            ->add('name', TextType::class, ['required' => true])
-            ->add('username', TextType::class, ['required' => true])
-            ->add('plainPassword', RepeatedType::class, [
-                'type' => PasswordType::class,
-                'first_options'  => ['label' => 'Password'],
-                'second_options' => ['label' => 'Repeat password'],
-                'required' => true,
-                'invalid_message' => 'The password fields must match.',
-            ])
-            ->add('roles', ChoiceType::class, [
-                'multiple' => true,
-                'choices' => [
-                    'ADMIN' => 'ADMIN',
-                    'PAGE_1' => 'PAGE_1',
-                    'PAGE_2' => 'PAGE_2',
-                ],
-                'required' => true,
-            ])
-            ->add('save', SubmitType::class, array('label' => 'New User'))
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted())
+        $name = $request->get('name');
+        $username = $request->get('username');
+        $plainPassword = $request->get('password');
+        $roles = $request->get('roles');
+        
+        if (empty($name) || empty($username) || empty($plainPassword) || empty($roles))
         {
-            $user = $form->getData();
-
-            $password = $passwordEncoder->encodePassword($user, $user->getPlainPassword());
-            $user->setPassword($password);
-
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($user);
-            $em->flush();
-
-            return $this->redirect('/view-user/' . $user->getId());
+            return new View("NULL VALUES ARE NOT ALLOWED", Response::HTTP_NOT_ACCEPTABLE); 
         }
 
-        return $this->render(
-            'user/edit.html.twig',
-            array('form' => $form->createView())
-        );*/
+        $encoder = $this->get('security.encoder_factory')->getEncoder(User::class);
+        $encodedPassword = $encoder->encodePassword($plainPassword, null);
+
+        $data->setName($name);
+        $data->setUsername($username);
+        $data->setPassword($encodedPassword);
+        $data->setRoles($roles);
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($data);
+        $em->flush();
+        
+        return new View("User added successfully", Response::HTTP_OK);
     }
 
     /**
-     * @Route("/user/{id}")
-     */   
-    public function viewAction($id)
+     * @Rest\Get("/user")
+     */
+    public function getAction()
     {
-        $user = $this->getDoctrine()
-            ->getRepository('AppBundle:User')
-            ->find($id);
-
-        $response = new JsonResponse();
-
-        if ($user)
+        $restresult = $this->getDoctrine()->getRepository('AppBundle:User')->findAll();
+        
+        if ($restresult === null)
         {
-            $data = array(
-                'status' => 'ok',
-                'user' => array(
-                    'name' => $user->getName(),
-                    'username' => $user->getUsername(),
-                    'roles' => $user->getRoles()
-                )
-            );
-        } 
-        else 
-        {
-            $data = array(
-                'status' => 'error', 
-                'message' => 'There are no users with the following id: ' . $id
-            );
+            return new View("There are no users", Response::HTTP_NOT_FOUND);
         }
-
-        $response->setData($data);
-
-        return $response;
+        
+        return $restresult;
     }
 
     /**
-     * @Route("/users")
-     */  
-    public function showAction()
+     * @Rest\Get("/user/{id}")
+     */
+    public function idAction($id)
     {
-        $users = $this->getDoctrine()
-            ->getRepository('AppBundle:User')
-            ->findAll();
-
-        $response = new JsonResponse();
-
-        $data = array(
-            'status' => 'ok',
-            'count' => count($users),
-            'users' => array()
-        );
-
-        if ($users)
+        $singleresult = $this->getDoctrine()->getRepository('AppBundle:User')->find($id);
+        
+        if ($singleresult === null) 
         {
-            foreach ($users as $user)
-            {
-                array_push(
-                    $data['users'], 
-                    array(
-                        'id' => $user->getId(),
-                        'name' => $user->getName(),
-                        'username' => $user->getUsername(),
-                        'roles' => $user->getRoles()
-                    )
-                );
-            }
+            return new View("User not found", Response::HTTP_NOT_FOUND);
         }
-
-        $response->setData($data);
-
-        return $response;
+        
+        return $singleresult;
     }
 
     /**
-     * @Route("/delete-user/{id}")
-     */ 
+     * @Rest\Delete("/user/{id}")
+     */
     public function deleteAction($id)
     {
-        $em = $this->getDoctrine()->getManager();
-        $user = $em->getRepository('AppBundle:User')->find($id);
-
-        $response = new JsonResponse();
-
-        if ($user)
+        $data = new User;
+        
+        $sn = $this->getDoctrine()->getManager();   
+        $user = $this->getDoctrine()->getRepository('AppBundle:User')->find($id);
+        
+        if (empty($user))
         {
-            $em->remove($user);
-            $em->flush();
-
-            $data = array(
-                'status' => 'ok',
-                'user' => array(
-                    'id' => $id
-                )
-            );
-        } 
+            return new View("User not found", Response::HTTP_NOT_FOUND);
+        }
         else 
         {
-            $data = array(
-                'status' => 'error', 
-                'message' => 'There are no users with the following id: ' . $id
-            );
+            $sn->remove($user);
+            $sn->flush();
         }
-
-        $response->setData($data);
-
-        return $response;
+        return new View("User deleted successfully", Response::HTTP_OK);
     }
 
     /**
-    * @Route("/update-article/{id}")
-    */  
-    public function updateAction(Request $request, $id)
-    {
+     * @Rest\Put("/user/{id}")
+     */
+    public function updateAction($id, Request $request)
+    { 
+        $data = new User;
+        
+        $name = $request->get('name');
+        $username = $request->get('username');
+        $plainPassword = $request->get('password');
+        $roles = $request->get('roles');
 
-      $em = $this->getDoctrine()->getManager();
-      $article = $em->getRepository('AppBundle:Article')->find($id);
+        $sn = $this->getDoctrine()->getManager();
+        $user = $this->getDoctrine()->getRepository('AppBundle:User')->find($id);
+        
+        if (empty($user))
+        {
+            return new View("User not found", Response::HTTP_NOT_FOUND);
+        } 
+        elseif (!empty($name) || !empty($username) || !empty($plainPassword) || !empty($roles))
+        {
+            if (!empty($name))
+            {
+                $user->setName($name);
+            }
 
-      if (!$article) {
-        throw $this->createNotFoundException(
-        'There are no articles with the following id: ' . $id
-        );
-      }
+            if (!empty($username))
+            {
+                $user->setUsername($username);
+            }
+            
+            if (!empty($plainPassword))
+            {
+                $encoder = $this->get('security.encoder_factory')->getEncoder(User::class);
+                $encodedPassword = $encoder->encodePassword($plainPassword, null);
+                $user->setPassword($encodedPassword);
+            }
 
-      $form = $this->createFormBuilder($article)
-        ->add('title', TextType::class)
-        ->add('author', TextType::class)
-        ->add('body', TextareaType::class)
-        ->add('url', TextType::class,
-        array('required' => false, 'attr' => array('placeholder' => 'www.example.com')))
-        ->add('save', SubmitType::class, array('label' => 'Update'))
-        ->getForm();
+            if (!empty($roles))
+            {
+                $user->setRoles($roles);
+            }
 
-      $form->handleRequest($request);
-
-      if ($form->isSubmitted()) {
-
-        $article = $form->getData();
-        $em->flush();
-
-        return $this->redirect('/view-article/' . $id);
-
-      }
-
-      return $this->render(
-        'article/edit.html.twig',
-        array('form' => $form->createView())
-        );
-
+            $sn->flush();
+            
+            return new View("User updated successfully", Response::HTTP_OK);
+        }
+        else
+        {
+            return new View("NULL VALUES ARE NOT ALLOWED", Response::HTTP_NOT_ACCEPTABLE); 
+        }
     }
 }
