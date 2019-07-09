@@ -17,6 +17,8 @@ class UserController extends FOSRestController {
      */
     public function postAction(Request $request)
     {
+        $this->denyAccessUnlessGranted('ADMIN');
+
         $data = new User;
 
         $name = $request->get('name');
@@ -79,6 +81,8 @@ class UserController extends FOSRestController {
      */
     public function deleteAction($id)
     {
+        $this->denyAccessUnlessGranted('ADMIN');
+
         $data = new User;
         
         $sn = $this->getDoctrine()->getManager();   
@@ -101,6 +105,8 @@ class UserController extends FOSRestController {
      */
     public function updateAction($id, Request $request)
     { 
+        $this->denyAccessUnlessGranted('ADMIN');
+
         $data = new User;
         
         $name = $request->get('name');
