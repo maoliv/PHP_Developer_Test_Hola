@@ -13,7 +13,7 @@ Instalación
 9. Abrir en un navegador la URL http://127.0.0.1:8000 y navegar por la web.
 
 API
-Abrir desde Postman la colección ./postman/PHP_Developer_test_Hola.postman_collection.json para ver los comandos disponibles.
+1. Abrir desde Postman la colección ./postman/PHP_Developer_test_Hola.postman_collection.json para ver los comandos disponibles.
 
 Test
 1. Ejecutar el comando /vendor/bin/simple-phpunit para llevar a cabo los tests. 
