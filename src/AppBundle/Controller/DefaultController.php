@@ -18,7 +18,7 @@ class DefaultController extends Controller
     {
         // replace this example code with whatever you need
         return $this->render('default/index.html.twig', [
-            'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
+            'base_dir' => realpath($this->getParameter('kernel.project_dir')) . DIRECTORY_SEPARATOR,
         ]);
     }
 
@@ -40,9 +40,9 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/page/1", name="page1")
+     * @Route("/page/{number}", name="page", requirements={"number"="1|2"})
      */
-    public function page1Action(Request $request)
+    public function pageAction(Request $request, $number)
     {
         $securityContext = $this->container->get('security.authorization_checker');
 
@@ -58,18 +58,22 @@ class DefaultController extends Controller
          * if the user is logged-in but do noy have the appropiate role an
          * error MUST be shown with a 403 HTTP response code
          */
-        if (false === $securityContext->isGranted(['ROLE_ADMIN', 'ROLE_PAGE_1'])) {
-            return $this->render('default/page1.html.twig', 
-                ['error' => 'You must have ROLE_ADMIN or ROLE_PAGE_1 to access this page.'],
+        if (false === $securityContext->isGranted(['ROLE_ADMIN', 'ROLE_PAGE_' . $number])) {
+            return $this->render('default/page.html.twig', 
+                [
+                    'error' => 'You must have ROLE_ADMIN or ROLE_PAGE_' .  $number . ' to access this page.',
+                    'number' => $number
+                ],
                 new Response('Invalid role', 403)
             );
         }
 
         $user = $this->getUser();
         
-        return $this->render('default/page1.html.twig', [
+        return $this->render('default/page.html.twig', [
             'error' => '',
             'user' => $user,
+            'number' => $number,
         ]);
     }
 

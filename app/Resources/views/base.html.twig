@@ -10,7 +10,11 @@
         {% block body %}{% endblock %}
         {% block javascripts %}{% endblock %}
         {% if is_granted(expression('not is_anonymous()')) %}
-            <p><a href="/logout">Logout</a></p>
+            <p>
+                <a href="/page/1">Page 1</a> | 
+                <a href="/page/2">Page 2</a> | 
+                <a href="/logout">Logout</a>
+            </p>
         {% endif %}
     </body>
 </html>

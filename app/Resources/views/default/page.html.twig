@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+	<h1>Page {{ number }}</h1>
+	{% if error %}
+	    <p>{{ error }}</p>
+	{% else %}
+	    <p>Hello {{ number }} {{ user.name }}</p>
+	{% endif %}
+{% endblock %}
