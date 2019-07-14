@@ -21,6 +21,7 @@ security:
             anonymous: ~
             http_basic: ~
             provider: our_db_provider
+            logout_on_user_change: true
             form_login:
                 login_path: login
                 check_path: login

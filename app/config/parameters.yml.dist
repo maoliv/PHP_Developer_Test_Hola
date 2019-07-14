@@ -17,3 +17,6 @@ parameters:
 
     # A secret key that's used to generate certain security-related tokens
     secret: ThisTokenIsNotSoSecretChangeIt
+
+    # After 300 seconds (5 minutes) without interaction the user MUST be considered logout
+    session_max_idle_time: 300
