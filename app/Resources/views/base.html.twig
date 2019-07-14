@@ -9,5 +9,8 @@
     <body>
         {% block body %}{% endblock %}
         {% block javascripts %}{% endblock %}
+        {% if is_granted(expression('not is_anonymous()')) %}
+            <p><a href="/logout">Logout</a></p>
+        {% endif %}
     </body>
 </html>

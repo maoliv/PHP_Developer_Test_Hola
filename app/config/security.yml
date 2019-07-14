@@ -17,7 +17,6 @@ security:
             security: false
  
         main:
-            logout_on_user_change: true
             pattern: ^/
             anonymous: ~
             http_basic: ~
@@ -25,6 +24,6 @@ security:
             form_login:
                 login_path: login
                 check_path: login
-
-    access_control:
-        - { path: ^/admin, roles: ROLE_ADMIN }
+            logout:
+                path: /logout
+                target: /

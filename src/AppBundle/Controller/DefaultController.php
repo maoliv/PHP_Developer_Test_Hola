@@ -40,14 +40,6 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/logout", name="logout")
-     */
-    public function logoutAction()
-    {
-        return new Response('<html><body>Logout page!</body></html>');
-    }
-
-    /**
      * @Route("/page/1", name="page1")
      */
     public function page1Action(Request $request)
