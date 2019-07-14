@@ -5,13 +5,13 @@ namespace AppBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use FOS\RestBundle\Controller\AbstractFOSRestController;
+use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\View\View;
 use AppBundle\Entity\User;
 
-class UserController extends AbstractFOSRestController {
+class UserController extends FOSRestController {
     /**
      * @Rest\Post("/user")
      */
@@ -157,5 +157,10 @@ class UserController extends AbstractFOSRestController {
         {
             return new View("NULL VALUES ARE NOT ALLOWED", Response::HTTP_NOT_ACCEPTABLE); 
         }
+    }
+
+    public static function getSubscribedServices()
+    {
+        return [];
     }
 }
