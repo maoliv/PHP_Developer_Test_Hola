@@ -17,7 +17,7 @@ class UserController extends FOSRestController {
      */
     public function postAction(Request $request)
     {
-        $this->denyAccessUnlessGranted('ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_ADMIN', null, 'Unable to access this page!');
 
         $data = new User;
 
@@ -51,6 +51,8 @@ class UserController extends FOSRestController {
      */
     public function getAction()
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_ANONYMOUSLY');
+
         $restresult = $this->getDoctrine()->getRepository('AppBundle:User')->findAll();
         
         if ($restresult === null)
@@ -66,6 +68,8 @@ class UserController extends FOSRestController {
      */
     public function idAction($id)
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_ANONYMOUSLY');
+        
         $singleresult = $this->getDoctrine()->getRepository('AppBundle:User')->find($id);
         
         if ($singleresult === null) 
@@ -81,7 +85,7 @@ class UserController extends FOSRestController {
      */
     public function deleteAction($id)
     {
-        $this->denyAccessUnlessGranted('ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_ADMIN', null, 'Unable to access this page!');
 
         $data = new User;
         
@@ -105,7 +109,7 @@ class UserController extends FOSRestController {
      */
     public function updateAction($id, Request $request)
     { 
-        $this->denyAccessUnlessGranted('ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_ADMIN', null, 'Unable to access this page!');
 
         $data = new User;
         

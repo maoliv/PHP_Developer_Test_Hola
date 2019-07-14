@@ -5,6 +5,9 @@ namespace AppBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class DefaultController extends Controller
 {
@@ -20,10 +23,58 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/admin")
+     * @Route("/logout", name="logout")
      */
-    public function adminAction()
+    public function logoutAction()
     {
-        return new Response('<html><body>Admin page!</body></html>');
+        return new Response('<html><body>Logout page!</body></html>');
+    }
+
+    /**
+     * @Route("/page/1", name="page1")
+     */
+    public function page1Action(Request $request)
+    {
+        $securityContext = $this->container->get('security.authorization_checker');
+
+        /** 
+         * if the user is not logged-in the page MUST redirect with a HTTP
+         * response code 302 to the login page
+         */
+        if ($securityContext->isGranted('IS_AUTHENTICATED_ANONYMOUSLY')) {
+            return new RedirectResponse('/login', 302);
+        }
+
+        /*
+         * if the user is logged-in but do noy have the appropiate role an
+         * error MUST be shown with a 403 HTTP response code
+         */
+        if (false === $securityContext->isGranted(['ROLE_ADMIN', 'ROLE_PAGE_1'])) {
+            return $this->render(
+                'default/page1.html.twig', 
+                ['error' => 'You must have ROLE_ADMIN or ROLE_PAGE_1 to access this page.'],
+                new Response('', 403)
+            );
+        }
+
+        $user = $this->getUser();
+        
+        return $this->render('default/page1.html.twig', [
+            'user' => $user
+        ]);
+    }
+
+    public function loginAction(AuthenticationUtils $authenticationUtils)
+    {
+        // get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+
+        // last username entered by the user
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        return $this->render('default/login.html.twig', [
+            'last_username' => $lastUsername,
+            'error'         => $error,
+        ]);
     }
 }

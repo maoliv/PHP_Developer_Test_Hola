@@ -12,7 +12,7 @@ use FOS\UserBundle\Model\User as BaseUser;
  * @ORM\Entity
  * @UniqueEntity(fields="username", message="Username already taken.")
  */
-class User implements UserInterface
+class User implements UserInterface, \Serializable
 {
     /**
      * @ORM\Id
@@ -117,7 +117,7 @@ class User implements UserInterface
 
     public function setRoles($roles)
     {
-        $allowed_roles = array('ADMIN', 'PAGE_1', 'PAGE_2');
+        $allowed_roles = array('ROLE_ADMIN', 'ROLE_PAGE_1', 'ROLE_PAGE_2');
         if (!empty($roles))
         {
             foreach ($roles as $role)
@@ -133,5 +133,27 @@ class User implements UserInterface
 
     public function eraseCredentials()
     {
+    }
+
+    /** @see \Serializable::serialize() */
+    public function serialize()
+    {
+        return serialize([
+            $this->id,
+            $this->name,
+            $this->username,
+            $this->password,
+        ]);
+    }
+
+    /** @see \Serializable::unserialize() */
+    public function unserialize($serialized)
+    {
+        list (
+            $this->id,
+            $this->name,
+            $this->username,
+            $this->password,
+        ) = unserialize($serialized, ['allowed_classes' => false]);
     }
 }
