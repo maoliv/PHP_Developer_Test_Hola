@@ -17,13 +17,14 @@ security:
             security: false
  
         main:
+            logout_on_user_change: true
             pattern: ^/
             anonymous: ~
             http_basic: ~
             provider: our_db_provider
-            logout:
-                path: /logout
-                target: /
+            form_login:
+                login_path: login
+                check_path: login
 
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }

@@ -23,6 +23,23 @@ class DefaultController extends Controller
     }
 
     /**
+     * @Route("/login", name="login")
+     */
+    public function loginAction(AuthenticationUtils $authenticationUtils)
+    {
+        // get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+
+        // last username entered by the user
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        return $this->render('default/login.html.twig', [
+            'last_username' => $lastUsername,
+            'error'         => $error,
+        ]);
+    }
+
+    /**
      * @Route("/logout", name="logout")
      */
     public function logoutAction()
@@ -41,40 +58,60 @@ class DefaultController extends Controller
          * if the user is not logged-in the page MUST redirect with a HTTP
          * response code 302 to the login page
          */
-        if ($securityContext->isGranted('IS_AUTHENTICATED_ANONYMOUSLY')) {
+        if (false === $securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             return new RedirectResponse('/login', 302);
         }
-
-        /*
+        
+        /**
          * if the user is logged-in but do noy have the appropiate role an
          * error MUST be shown with a 403 HTTP response code
          */
         if (false === $securityContext->isGranted(['ROLE_ADMIN', 'ROLE_PAGE_1'])) {
-            return $this->render(
-                'default/page1.html.twig', 
+            return $this->render('default/page1.html.twig', 
                 ['error' => 'You must have ROLE_ADMIN or ROLE_PAGE_1 to access this page.'],
-                new Response('', 403)
+                new Response('Invalid role', 403)
             );
         }
 
         $user = $this->getUser();
         
         return $this->render('default/page1.html.twig', [
-            'user' => $user
+            'error' => '',
+            'user' => $user,
         ]);
     }
 
-    public function loginAction(AuthenticationUtils $authenticationUtils)
+    /**
+     * @Route("/page/2", name="page2")
+     */
+    public function page2Action(Request $request)
     {
-        // get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
+        $securityContext = $this->container->get('security.authorization_checker');
 
-        // last username entered by the user
-        $lastUsername = $authenticationUtils->getLastUsername();
+        /** 
+         * if the user is not logged-in the page MUST redirect with a HTTP
+         * response code 302 to the login page
+         */
+        if (false === $securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+            return new RedirectResponse('/login', 302);
+        }
+        
+        /**
+         * if the user is logged-in but do noy have the appropiate role an
+         * error MUST be shown with a 403 HTTP response code
+         */
+        if (false === $securityContext->isGranted(['ROLE_ADMIN', 'ROLE_PAGE_2'])) {
+            return $this->render('default/page2.html.twig', 
+                ['error' => 'You must have ROLE_ADMIN or ROLE_PAGE_2 to access this page.'],
+                new Response('Invalid role', 403)
+            );
+        }
 
-        return $this->render('default/login.html.twig', [
-            'last_username' => $lastUsername,
-            'error'         => $error,
+        $user = $this->getUser();
+        
+        return $this->render('default/page2.html.twig', [
+            'error' => '',
+            'user' => $user,
         ]);
     }
 }
