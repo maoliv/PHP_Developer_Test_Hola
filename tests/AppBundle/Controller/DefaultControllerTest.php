@@ -1,18 +1,38 @@
 <?php
 
-namespace Tests\AppBundle\Controller;
+namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\BrowserKit\Cookie;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 class DefaultControllerTest extends WebTestCase
 {
-    public function testIndex()
+    private $client = null;
+
+    public function setUp()
     {
-        $client = static::createClient();
-
-        $crawler = $client->request('GET', '/');
-
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $this->assertContains('Welcome to Symfony', $crawler->filter('#container h1')->text());
+        $this->client = static::createClient([], [
+            'PHP_AUTH_USER' => 'admin',
+            'PHP_AUTH_PW'   => 'adminpassword',
+        ]);
     }
+
+    public function testSecuredPage1()
+    {
+        $crawler = $this->client->request('GET', '/page/1');
+
+        $this->assertSame(200, $this->client->getResponse()->getStatusCode());
+        $this->assertSame('Hello 1 Admin', $crawler->filter('p')->text());
+    }
+
+    public function testSecuredPage2()
+    {
+        $crawler = $this->client->request('GET', '/page/2');
+
+        $this->assertSame(200, $this->client->getResponse()->getStatusCode());
+        $this->assertSame('Hello 2 Admin', $crawler->filter('p')->text());
+    }
+
 }
