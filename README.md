@@ -1,6 +1,7 @@
 
 PHP Developer Test
 ========================
+Instalación
 1. Instalar PHP 7.2
 2. Instalar MySQL.
 3. Instalar Symfony.
@@ -10,3 +11,9 @@ PHP Developer Test
 7. Desde el directorio del proyecto, ejecutar: $ composer update
 8. Ejecutar php bin/console server:start para arrancar el servidor.
 9. Abrir en un navegador la URL http://127.0.0.1:8000 y navegar por la web.
+
+API
+Abrir desde Postman la colección ./postman/PHP_Developer_test_Hola.postman_collection.json para ver los comandos disponibles.
+
+Test
+1. Ejecutar el comando /vendor/bin/simple-phpunit para llevar a cabo los tests. 
